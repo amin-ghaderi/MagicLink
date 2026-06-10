@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Confetti } from '@/components/effects/Confetti';
 import { Hearts } from '@/components/effects/Hearts';
 import { FadeIn } from '@/components/effects/FadeIn';
@@ -21,6 +21,7 @@ interface ImpossibleNoExperienceProps {
 
 export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) {
   const [accepted, setAccepted] = useState(false);
+  const boundsContainerRef = useRef<HTMLDivElement>(null);
   const theme = useMemo(() => getTheme(config.theme), [config.theme]);
   const mode = useInteractionMode();
   const { getNextMessage } = useEscapeMessages(config.seed);
@@ -31,12 +32,17 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
     buttonRef,
     isFloating,
     position,
+    instantMove,
     escapeCount,
     tauntMessage,
     scale,
     transitionDuration,
-    tryEscape,
-  } = useEscapingButton({ mode, onEscape: getMessage });
+    triggerEscape,
+  } = useEscapingButton({
+    mode,
+    boundsContainerRef,
+    onEscape: getMessage,
+  });
 
   if (accepted) {
     return (
@@ -78,15 +84,16 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
 
           <FadeIn delay={150}>
             <Card
+              ref={boundsContainerRef}
               className={cn(
-                'overflow-hidden shadow-2xl backdrop-blur-md',
+                'relative overflow-visible shadow-2xl backdrop-blur-md',
                 theme.card,
               )}
             >
               <CardContent className="space-y-6 p-7 sm:p-9">
                 <div
                   className={cn(
-                    'flex min-h-[3.5rem] flex-wrap items-center justify-center gap-4',
+                    'relative flex min-h-[3.5rem] flex-wrap items-center justify-center gap-4',
                     isFloating && 'min-h-[4rem]',
                   )}
                 >
@@ -94,7 +101,7 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                     type="button"
                     size="lg"
                     className={cn(
-                      'min-w-[7.5rem] px-8 text-base shadow-lg',
+                      'relative z-10 min-w-[7.5rem] px-8 text-base shadow-lg',
                       theme.yesButton,
                     )}
                     onClick={() => setAccepted(true)}
@@ -111,7 +118,8 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                     className={theme.noButton}
                     scale={scale}
                     transitionDuration={transitionDuration}
-                    onMobileEscape={tryEscape}
+                    instantMove={instantMove}
+                    onForceEscape={triggerEscape}
                   />
                 </div>
 

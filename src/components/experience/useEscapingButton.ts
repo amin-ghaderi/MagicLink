@@ -3,94 +3,51 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { InteractionMode } from '@/hooks/useInteractionMode';
 import {
-  getDangerRadius,
-  getEscapeSpeed,
-  getMinJumpDistance,
-  getNoButtonScale,
-} from './escapeDifficulty';
-
-const PADDING = 12;
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-function getViewportBounds(width: number, height: number) {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const minX = PADDING;
-  const minY = PADDING;
-  const maxX = Math.max(minX, vw - width - PADDING);
-  const maxY = Math.max(minY, vh - height - PADDING);
-  return { minX, minY, maxX, maxY };
-}
-
-function clampToViewport(pos: Position, width: number, height: number): Position {
-  const { minX, minY, maxX, maxY } = getViewportBounds(width, height);
-  return {
-    x: Math.min(Math.max(pos.x, minX), maxX),
-    y: Math.min(Math.max(pos.y, minY), maxY),
-  };
-}
-
-function randomPosition(width: number, height: number): Position {
-  const { minX, minY, maxX, maxY } = getViewportBounds(width, height);
-  return clampToViewport(
-    {
-      x: minX + Math.random() * Math.max(0, maxX - minX),
-      y: minY + Math.random() * Math.max(0, maxY - minY),
-    },
-    width,
-    height,
-  );
-}
-
-function randomPositionAwayFrom(
-  current: Position,
-  width: number,
-  height: number,
-  minDistance: number,
-): Position {
-  for (let i = 0; i < 36; i++) {
-    const next = randomPosition(width, height);
-    if (Math.hypot(next.x - current.x, next.y - current.y) >= minDistance) {
-      return next;
-    }
-  }
-  return randomPosition(width, height);
-}
+  clampToBounds,
+  distanceBetween,
+  getButtonCenter,
+  getSafeBounds,
+  randomPositionAwayFrom,
+  type Position,
+} from './escapeBounds';
+import { logEscapeDebug } from './escapeDebug';
+import { DANGER_RADIUS, getEscapeSpeed, getMinJumpDistance, getNoButtonScale } from './escapeDifficulty';
 
 interface UseEscapingButtonOptions {
   mode: InteractionMode;
+  boundsContainerRef: React.RefObject<HTMLElement | null>;
   onEscape: () => string;
 }
 
-export function useEscapingButton({ mode, onEscape }: UseEscapingButtonOptions) {
+export function useEscapingButton({
+  mode,
+  boundsContainerRef,
+  onEscape,
+}: UseEscapingButtonOptions) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isFloatingRef = useRef(false);
-  const escapingRef = useRef(false);
   const canEscapeRef = useRef(false);
   const escapeCountRef = useRef(0);
   const onEscapeRef = useRef(onEscape);
+  const pointerRef = useRef<Position | null>(null);
+  const lastMessageAtRef = useRef(0);
+  const lastMoveAtRef = useRef(0);
+
   onEscapeRef.current = onEscape;
 
   const [canEscape, setCanEscape] = useState(false);
   const [isFloating, setIsFloating] = useState(false);
   const [position, setPosition] = useState<Position | null>(null);
+  const [instantMove, setInstantMove] = useState(false);
   const [escapeCount, setEscapeCount] = useState(0);
   const [tauntMessage, setTauntMessage] = useState<string | null>(null);
 
-  // Sync escape count to ref for proximity listener
-  useEffect(() => {
-    escapeCountRef.current = escapeCount;
-  }, [escapeCount]);
-
-  // Enable escaping after first user interaction
+  // Enable escaping after first interaction
   useEffect(() => {
     const enable = () => {
       canEscapeRef.current = true;
       setCanEscape(true);
+      logEscapeDebug({ device: mode, reason: 'escape-enabled' });
     };
     window.addEventListener('pointerdown', enable, {
       passive: true,
@@ -102,79 +59,145 @@ export function useEscapingButton({ mode, onEscape }: UseEscapingButtonOptions) 
       window.removeEventListener('pointerdown', enable, { capture: true });
       window.removeEventListener('keydown', enable, { capture: true });
     };
-  }, []);
+  }, [mode]);
 
-  const moveButton = useCallback(() => {
-    const el = buttonRef.current;
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    const { width, height } = rect;
-    const minDist = getMinJumpDistance(escapeCountRef.current);
-
-    if (!isFloatingRef.current) {
-      const origin = clampToViewport({ x: rect.left, y: rect.top }, width, height);
-      isFloatingRef.current = true;
-      setIsFloating(true);
-      setPosition(origin);
-      requestAnimationFrame(() => {
-        setPosition(randomPositionAwayFrom(origin, width, height, minDist));
-      });
-    } else {
-      setPosition((prev) => {
-        const current = clampToViewport(
-          prev ?? { x: rect.left, y: rect.top },
-          width,
-          height,
-        );
-        return randomPositionAwayFrom(current, width, height, minDist);
-      });
-    }
-
-    escapeCountRef.current += 1;
-    setEscapeCount(escapeCountRef.current);
-  }, []);
-
-  const tryEscape = useCallback(() => {
-    if (!canEscapeRef.current || escapingRef.current) return;
-
-    escapingRef.current = true;
-    const message = onEscapeRef.current();
-    moveButton();
-    setTauntMessage(message);
-
-    setTimeout(() => {
-      escapingRef.current = false;
-    }, mode === 'mobile' ? 80 : 150);
-  }, [moveButton, mode]);
-
-  // Desktop: proximity-based escape via pointer movement
+  // Global pointer tracking
   useEffect(() => {
-    if (mode !== 'desktop') return;
-
-    const handlePointerMove = (e: PointerEvent) => {
+    const track = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
-      if (!canEscapeRef.current || escapingRef.current) return;
+      pointerRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('pointermove', track, { passive: true });
+    window.addEventListener('pointerdown', track, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', track);
+      window.removeEventListener('pointerdown', track);
+    };
+  }, []);
 
+  const moveButton = useCallback(
+    (reason: string) => {
       const el = buttonRef.current;
       if (!el) return;
 
       const rect = el.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const distance = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-      const radius = getDangerRadius(escapeCountRef.current);
+      const { width, height } = rect;
+      const bounds = getSafeBounds(boundsContainerRef.current, width, height);
+      const minDist = getMinJumpDistance(escapeCountRef.current);
 
-      if (distance < radius) {
-        tryEscape();
+      setInstantMove(true);
+
+      if (!isFloatingRef.current) {
+        const origin = clampToBounds({ x: rect.left, y: rect.top }, width, height, bounds);
+        isFloatingRef.current = true;
+        setIsFloating(true);
+        const next = randomPositionAwayFrom(origin, width, height, minDist, bounds);
+        setPosition(next);
+
+        logEscapeDebug({
+          device: mode,
+          reason,
+          pointer: pointerRef.current ?? undefined,
+          button: {
+            left: rect.left,
+            top: rect.top,
+            centerX: origin.x + width / 2,
+            centerY: origin.y + height / 2,
+          },
+          distance: pointerRef.current
+            ? distanceBetween(pointerRef.current, {
+                x: origin.x + width / 2,
+                y: origin.y + height / 2,
+              })
+            : undefined,
+          dangerRadius: DANGER_RADIUS,
+        });
+      } else {
+        setPosition((prev) => {
+          const current = clampToBounds(
+            prev ?? { x: rect.left, y: rect.top },
+            width,
+            height,
+            bounds,
+          );
+          const next = randomPositionAwayFrom(current, width, height, minDist, bounds);
+
+          logEscapeDebug({
+            device: mode,
+            reason,
+            pointer: pointerRef.current ?? undefined,
+            button: {
+              left: next.x,
+              top: next.y,
+              centerX: next.x + width / 2,
+              centerY: next.y + height / 2,
+            },
+            distance: pointerRef.current
+              ? distanceBetween(pointerRef.current, {
+                  x: next.x + width / 2,
+                  y: next.y + height / 2,
+                })
+              : undefined,
+            dangerRadius: DANGER_RADIUS,
+          });
+
+          return next;
+        });
       }
+
+      escapeCountRef.current += 1;
+      setEscapeCount(escapeCountRef.current);
+
+      requestAnimationFrame(() => setInstantMove(false));
+    },
+    [boundsContainerRef, mode],
+  );
+
+  const triggerEscape = useCallback(
+    (reason: string, options?: { skipCooldown?: boolean }) => {
+      if (!canEscapeRef.current) return;
+
+      const now = Date.now();
+      const moveCooldown = mode === 'desktop' ? 70 : 0;
+      if (!options?.skipCooldown && now - lastMoveAtRef.current < moveCooldown) {
+        return;
+      }
+      lastMoveAtRef.current = now;
+
+      moveButton(reason);
+
+      if (mode === 'mobile' || now - lastMessageAtRef.current > 350) {
+        setTauntMessage(onEscapeRef.current());
+        lastMessageAtRef.current = now;
+      }
+    },
+    [mode, moveButton],
+  );
+
+  // Desktop: rAF proximity loop — escape BEFORE cursor reaches button
+  useEffect(() => {
+    if (mode !== 'desktop') return;
+
+    let rafId = 0;
+
+    const tick = () => {
+      if (canEscapeRef.current && pointerRef.current && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        const center = getButtonCenter(rect);
+        const dist = distanceBetween(pointerRef.current, center);
+
+        if (dist < DANGER_RADIUS) {
+          triggerEscape('desktop-proximity');
+        }
+      }
+      rafId = requestAnimationFrame(tick);
     };
 
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    return () => window.removeEventListener('pointermove', handlePointerMove);
-  }, [mode, tryEscape]);
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [mode, triggerEscape]);
 
-  // Keep button inside viewport on resize
+  // Re-clamp on resize
   useEffect(() => {
     if (!isFloating) return;
 
@@ -182,7 +205,8 @@ export function useEscapingButton({ mode, onEscape }: UseEscapingButtonOptions) 
       const el = buttonRef.current;
       if (!el) return;
       const { width, height } = el.getBoundingClientRect();
-      setPosition((prev) => (prev ? clampToViewport(prev, width, height) : prev));
+      const bounds = getSafeBounds(boundsContainerRef.current, width, height);
+      setPosition((prev) => (prev ? clampToBounds(prev, width, height, bounds) : prev));
     };
 
     window.addEventListener('resize', keepInView);
@@ -191,17 +215,18 @@ export function useEscapingButton({ mode, onEscape }: UseEscapingButtonOptions) 
       window.removeEventListener('resize', keepInView);
       window.removeEventListener('orientationchange', keepInView);
     };
-  }, [isFloating]);
+  }, [isFloating, boundsContainerRef]);
 
   return {
     buttonRef,
     canEscape,
     isFloating,
     position,
+    instantMove,
     escapeCount,
     tauntMessage,
     scale: getNoButtonScale(escapeCount),
     transitionDuration: getEscapeSpeed(escapeCount),
-    tryEscape,
+    triggerEscape,
   };
 }
