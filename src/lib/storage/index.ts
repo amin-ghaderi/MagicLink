@@ -1,3 +1,4 @@
+export { validateGoogleOAuthConfig } from './googleCredentials';
 export { getStorageProvider } from './getStorageProvider';
 export { buildGoogleDriveDirectUrl, isGoogleDriveDirectUrl } from './directImageUrl';
 export { GoogleDriveProvider } from './GoogleDriveProvider';

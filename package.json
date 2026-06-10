@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "google:oauth-token": "node scripts/get-google-refresh-token.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

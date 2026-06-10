@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import { google, type drive_v3 } from 'googleapis';
 import { buildGoogleDriveDirectUrl } from '@/lib/storage/directImageUrl';
-import { getGoogleDriveAuth } from '@/lib/storage/googleCredentials';
+import { getGoogleDriveAuth, validateGoogleOAuthConfig } from '@/lib/storage/googleCredentials';
 import type { StorageProvider, StorageProviderConfig, UploadParams, UploadResult } from '@/lib/storage/types';
 
 /** In-memory cache for folder IDs (per serverless instance) */
@@ -13,10 +13,12 @@ export class GoogleDriveProvider implements StorageProvider {
   private readonly driveId?: string;
 
   constructor(config: StorageProviderConfig = {}) {
+    validateGoogleOAuthConfig();
+
     const rootId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID;
     if (!rootId) {
       throw new Error(
-        'GOOGLE_DRIVE_ROOT_FOLDER_ID is required. Create "LahzeSaz Uploads" in Drive, share it with the service account, and set the folder ID.',
+        'GOOGLE_DRIVE_ROOT_FOLDER_ID is required. Create "LahzeSaz Uploads" in your Google Drive and set the folder ID.',
       );
     }
     this.rootFolderId = rootId;
