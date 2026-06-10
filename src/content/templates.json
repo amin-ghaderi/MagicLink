@@ -1,0 +1,38 @@
+[
+  {
+    "id": "date",
+    "name": "Date Invitation",
+    "description": "Romantic date invitations with a warm, personal touch",
+    "emoji": "💕"
+  },
+  {
+    "id": "birthday",
+    "name": "Birthday Surprise",
+    "description": "Celebrate birthdays with confetti and joyful wishes",
+    "emoji": "🎂"
+  },
+  {
+    "id": "anniversary",
+    "name": "Anniversary",
+    "description": "Mark milestones and celebrate love together",
+    "emoji": "💍"
+  },
+  {
+    "id": "friendship",
+    "name": "Friendship",
+    "description": "Show appreciation for your closest friends",
+    "emoji": "🤝"
+  },
+  {
+    "id": "greeting",
+    "name": "Greeting Card",
+    "description": "Simple, heartfelt greetings for any occasion",
+    "emoji": "✉️"
+  },
+  {
+    "id": "custom",
+    "name": "Custom Page",
+    "description": "A flexible canvas for any personalized experience",
+    "emoji": "✨"
+  }
+]

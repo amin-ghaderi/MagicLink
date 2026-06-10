@@ -1,0 +1,83 @@
+[
+  {
+    "slug": "homa",
+    "template": "date",
+    "title": "Will you go on a date with me?",
+    "subtitle": "I have something special planned",
+    "name": "Homa",
+    "message": "I've been thinking about this for a while. There's a place I'd love to take you — good food, great conversation, and a night to remember.",
+    "image": "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&q=80",
+    "animation": "hearts",
+    "buttons": [
+      { "label": "Yes, I'd love to!", "href": "#yes", "variant": "primary" },
+      { "label": "Tell me more", "href": "#details", "variant": "secondary" }
+    ]
+  },
+  {
+    "slug": "sara-birthday",
+    "template": "birthday",
+    "title": "Happy Birthday, Sara!",
+    "subtitle": "A surprise made just for you",
+    "name": "Sara",
+    "message": "Wishing you a day filled with laughter, cake, and all the things that make you smile. You deserve the world!",
+    "image": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80",
+    "animation": "confetti",
+    "buttons": [
+      { "label": "Open your wish", "href": "#wish", "variant": "primary" }
+    ]
+  },
+  {
+    "slug": "john-anniversary",
+    "template": "anniversary",
+    "title": "Happy Anniversary",
+    "subtitle": "Celebrating every moment together",
+    "name": "John & Jane",
+    "message": "Five incredible years of adventures, inside jokes, and growing together. Here's to forever and always.",
+    "image": "https://images.unsplash.com/photo-1518199266791-5375a57590ae?w=800&q=80",
+    "animation": "fade",
+    "buttons": [
+      { "label": "Our story", "href": "#story", "variant": "primary" }
+    ]
+  },
+  {
+    "slug": "best-friends",
+    "template": "friendship",
+    "title": "To My Best Friend",
+    "subtitle": "Thank you for being you",
+    "name": "Alex",
+    "message": "Through every laugh, every late-night talk, and every crazy adventure — you've been the best. Life is better with you in it.",
+    "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80",
+    "animation": "slide",
+    "buttons": [
+      { "label": "You're the best", "href": "#", "variant": "primary" }
+    ]
+  },
+  {
+    "slug": "hello-world",
+    "template": "greeting",
+    "title": "Hello from Magic Link",
+    "subtitle": "A warm greeting, just for you",
+    "name": "Friend",
+    "message": "Sometimes the simplest messages carry the most meaning. Sending you good vibes and a big smile today!",
+    "image": "https://images.unsplash.com/photo-1465146633011-14f8e0781093?w=800&q=80",
+    "animation": "fade",
+    "buttons": [
+      { "label": "Smile back", "href": "#", "variant": "primary" }
+    ]
+  },
+  {
+    "slug": "client-123",
+    "template": "custom",
+    "title": "Your Custom Experience",
+    "subtitle": "Built uniquely for you",
+    "name": "Client",
+    "message": "This is a fully customizable page. Swap the content in links.json to create any interactive experience you can imagine.",
+    "image": "https://images.unsplash.com/photo-1557683316-973673baf926?w=800&q=80",
+    "animation": "none",
+    "accent": "#6366f1",
+    "buttons": [
+      { "label": "Get started", "href": "#", "variant": "primary" },
+      { "label": "Learn more", "href": "#", "variant": "ghost" }
+    ]
+  }
+]
