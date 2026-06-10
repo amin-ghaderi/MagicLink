@@ -7,6 +7,7 @@ import { Hearts } from '@/components/effects/Hearts';
 import { FadeIn } from '@/components/effects/FadeIn';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { SiteFooter } from '@/components/layout/SiteFooter';
 import { toProxiedDriveImageUrl } from '@/lib/storage/driveImageUrl';
 import type { LoveLetterConfig } from '@/types/loveLetter';
 import { GradualLetterText } from './GradualLetterText';
@@ -24,7 +25,7 @@ export function LoveLetterExperience({ config }: LoveLetterExperienceProps) {
   const displayImageUrl = config.imageUrl ? toProxiedDriveImageUrl(config.imageUrl) : '';
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-rose-950 via-pink-950 to-violet-950 text-white">
+    <div className="relative flex min-h-screen flex-col bg-gradient-to-br from-rose-950 via-pink-950 to-violet-950 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(251,207,232,0.12),_transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(167,139,250,0.1),_transparent_50%)]" />
 
@@ -35,7 +36,7 @@ export function LoveLetterExperience({ config }: LoveLetterExperienceProps) {
         </>
       )}
 
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-lg flex-col px-5 py-10 sm:py-14">
+      <main className="relative z-10 mx-auto flex flex-1 max-w-lg flex-col px-5 py-10 sm:py-14">
         {/* Envelope header */}
         <FadeIn>
           <div className="mb-8 text-center">
@@ -111,6 +112,7 @@ export function LoveLetterExperience({ config }: LoveLetterExperienceProps) {
           <div className="mt-6 h-px bg-gradient-to-l from-transparent via-rose-300/20 to-transparent" />
         </div>
       </main>
+      <SiteFooter compact />
     </div>
   );
 }

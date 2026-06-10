@@ -18,7 +18,7 @@ export default function LoveLetterLandingPage() {
   const demoUrl = buildLoveLetterDemoUrl();
 
   return (
-    <PageShell gradient="rose">
+    <PageShell gradient="rose" showFooter>
       <SiteHeader />
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
         <section className="mb-16 text-center">
@@ -95,11 +95,6 @@ export default function LoveLetterLandingPage() {
           </FadeIn>
         </section>
 
-        <footer className="border-t border-white/10 pt-8 text-center text-sm text-white/50">
-          <Link href="/" className="text-rose-300/80 hover:text-rose-200">
-            ← بازگشت به لحظه‌ساز
-          </Link>
-        </footer>
       </div>
     </PageShell>
   );

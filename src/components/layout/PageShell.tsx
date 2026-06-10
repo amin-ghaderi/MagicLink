@@ -1,9 +1,12 @@
+import { SiteFooter } from '@/components/layout/SiteFooter';
 import { cn } from '@/lib/utils';
 
 interface PageShellProps {
   children: React.ReactNode;
   className?: string;
   gradient?: 'violet' | 'rose' | 'amber' | 'sky' | 'indigo' | 'slate';
+  /** Show full legal footer on marketing pages */
+  showFooter?: boolean;
 }
 
 const gradients = {
@@ -15,17 +18,25 @@ const gradients = {
   slate: 'from-slate-950 via-slate-900 to-violet-950',
 };
 
-export function PageShell({ children, className, gradient = 'violet' }: PageShellProps) {
+export function PageShell({
+  children,
+  className,
+  gradient = 'violet',
+  showFooter = false,
+}: PageShellProps) {
   return (
     <div
       className={cn(
-        'relative min-h-screen bg-gradient-to-br text-white',
+        'relative flex min-h-screen flex-col bg-gradient-to-br text-white',
         gradients[gradient],
         className,
       )}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent" />
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 flex flex-1 flex-col">
+        <div className="flex-1">{children}</div>
+        {showFooter && <SiteFooter />}
+      </div>
     </div>
   );
 }

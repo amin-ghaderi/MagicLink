@@ -34,7 +34,7 @@ export function PlatformHome() {
   };
 
   return (
-    <PageShell gradient="violet">
+    <PageShell gradient="violet" showFooter>
       <SiteHeader />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -217,15 +217,6 @@ export function PlatformHome() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-white/10 py-12 text-center">
-          <p className="mb-2 text-lg font-semibold text-white/90">لحظه‌ساز</p>
-          <p className="text-sm leading-relaxed text-white/50">
-            خلق لحظه‌های کوچک
-            <br />
-            برای آدم‌های مهم زندگی.
-          </p>
-        </footer>
       </div>
     </PageShell>
   );

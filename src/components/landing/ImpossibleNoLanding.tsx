@@ -30,7 +30,7 @@ export function ImpossibleNoLanding() {
   const demoUrl = buildDemoUrl();
 
   return (
-    <PageShell gradient="rose">
+    <PageShell gradient="rose" showFooter>
       <SiteHeader />
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
         <section className="mb-16 text-center">
@@ -133,11 +133,6 @@ export function ImpossibleNoLanding() {
           </FadeIn>
         </section>
 
-        <footer className="border-t border-white/10 pt-8 text-center text-sm text-white/50">
-          <Link href="/" className="text-pink-300/80 hover:text-pink-200">
-            ← بازگشت به لحظه‌ساز
-          </Link>
-        </footer>
       </div>
     </PageShell>
   );

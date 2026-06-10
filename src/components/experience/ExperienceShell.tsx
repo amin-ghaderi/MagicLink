@@ -1,3 +1,4 @@
+import { SiteFooter } from '@/components/layout/SiteFooter';
 import { cn } from '@/lib/utils';
 import type { ThemeDefinition } from '@/lib/themes';
 import { ThemeDecorations } from './ThemeDecorations';
@@ -6,17 +7,19 @@ interface ExperienceShellProps {
   theme: ThemeDefinition;
   children: React.ReactNode;
   showDecorations?: boolean;
+  showLegalFooter?: boolean;
 }
 
 export function ExperienceShell({
   theme,
   children,
   showDecorations = true,
+  showLegalFooter = true,
 }: ExperienceShellProps) {
   return (
     <div
       className={cn(
-        'relative min-h-screen bg-gradient-to-br text-white',
+        'relative flex min-h-screen flex-col bg-gradient-to-br text-white',
         theme.pageGradient,
       )}
     >
@@ -27,7 +30,8 @@ export function ExperienceShell({
         )}
       />
       {showDecorations && <ThemeDecorations theme={theme} />}
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 flex flex-1 flex-col">{children}</div>
+      {showLegalFooter && <SiteFooter compact />}
     </div>
   );
 }
