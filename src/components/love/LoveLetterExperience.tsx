@@ -7,6 +7,7 @@ import { Hearts } from '@/components/effects/Hearts';
 import { FadeIn } from '@/components/effects/FadeIn';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toProxiedDriveImageUrl } from '@/lib/storage/driveImageUrl';
 import type { LoveLetterConfig } from '@/types/loveLetter';
 import { GradualLetterText } from './GradualLetterText';
 
@@ -20,6 +21,7 @@ export function LoveLetterExperience({ config }: LoveLetterExperienceProps) {
 
   const showImage = Boolean(config.imageUrl) && letterDone;
   const showCta = letterDone;
+  const displayImageUrl = config.imageUrl ? toProxiedDriveImageUrl(config.imageUrl) : '';
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-rose-950 via-pink-950 to-violet-950 text-white">
@@ -71,14 +73,12 @@ export function LoveLetterExperience({ config }: LoveLetterExperienceProps) {
             <FadeIn delay={0}>
               <div className="relative mx-auto mt-8 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-xl shadow-lg ring-1 ring-rose-300/20">
                 <Image
-                  src={config.imageUrl}
+                  src={displayImageUrl}
                   alt=""
                   fill
                   className="object-cover"
                   sizes="(max-width: 512px) 100vw, 384px"
-                  unoptimized={
-                    !config.imageUrl.includes('images.unsplash.com')
-                  }
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-rose-950/30 to-transparent" />
               </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { toProxiedDriveImageUrl } from '@/lib/storage/driveImageUrl';
 import { cn } from '@/lib/utils';
 import { UploadProgress, type UploadPhase } from './UploadProgress';
 import { UploadError } from './UploadError';
@@ -42,6 +43,9 @@ export function ImagePreviewCard({
   className,
 }: ImagePreviewCardProps) {
   const badge = STATUS_BADGE[status];
+  const displaySrc = previewUrl.startsWith('blob:')
+    ? previewUrl
+    : toProxiedDriveImageUrl(previewUrl);
 
   return (
     <div
@@ -54,7 +58,7 @@ export function ImagePreviewCard({
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/30">
         <Image
-          src={previewUrl}
+          src={displaySrc}
           alt=""
           fill
           className={cn(
