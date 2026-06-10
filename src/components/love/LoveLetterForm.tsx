@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ImageUploader } from '@/components/media/ImageUploader';
 import { buildLoveLetterUrl } from '@/lib/templates/loveLetterParams';
+import { MEDIA_TEMPLATE_FOLDERS } from '@/lib/storage/types';
 import { DEFAULT_LOVE_LETTER, type LoveLetterConfig } from '@/types/loveLetter';
 
 export function LoveLetterForm() {
@@ -12,6 +14,7 @@ export function LoveLetterForm() {
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,13 +81,14 @@ export function LoveLetterForm() {
               className="w-full resize-none rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 focus:border-rose-400/50 focus:outline-none focus:ring-2 focus:ring-rose-400/30"
             />
           </div>
-          <Field
-            id="imageUrl"
-            label="لینک عکس (اختیاری)"
-            value={form.imageUrl ?? ''}
-            placeholder="https://..."
-            required={false}
-            onChange={(v) => setForm((p) => ({ ...p, imageUrl: v || undefined }))}
+          <ImageUploader
+            value={form.imageUrl}
+            onChange={(url) => setForm((p) => ({ ...p, imageUrl: url }))}
+            onUploadingChange={setImageUploading}
+            templateFolder={MEDIA_TEMPLATE_FOLDERS.LOVE_LETTER}
+            label="آپلود عکس"
+            accent="rose"
+            optional
           />
           <Field
             id="ctaLabel"
@@ -103,9 +107,10 @@ export function LoveLetterForm() {
           <Button
             type="submit"
             size="lg"
-            className="w-full bg-gradient-to-l from-rose-500 to-pink-600 text-base shadow-lg shadow-rose-500/25 hover:from-rose-400 hover:to-pink-500"
+            disabled={imageUploading}
+            className="w-full bg-gradient-to-l from-rose-500 to-pink-600 text-base shadow-lg shadow-rose-500/25 hover:from-rose-400 hover:to-pink-500 disabled:opacity-60"
           >
-            ساخت لینک
+            {imageUploading ? 'در حال آپلود عکس...' : 'ساخت لینک'}
           </Button>
         </form>
 
@@ -162,7 +167,7 @@ function Field({
         id={id}
         type="text"
         required={required}
-        maxLength={id === 'imageUrl' ? 500 : 200}
+        maxLength={200}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

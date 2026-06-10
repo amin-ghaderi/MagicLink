@@ -136,3 +136,12 @@
 .animate-love-title {
   animation: love-title 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+@keyframes upload-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
