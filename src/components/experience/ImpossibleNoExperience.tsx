@@ -22,12 +22,21 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
   const [accepted, setAccepted] = useState(false);
   const theme = useMemo(() => getTheme(config.theme), [config.theme]);
   const { getNextMessage } = useEscapeMessages(config.seed);
-  const { buttonRef, isFloating, position, escapeCount, tauntMessage, handleEscape } =
-    useEscapingButton();
+  const {
+    buttonRef,
+    canEscape,
+    isFloating,
+    position,
+    escapeCount,
+    tauntMessage,
+    scale,
+    transitionDuration,
+    tryEscape,
+  } = useEscapingButton();
 
   const onNoEscape = useCallback(() => {
-    handleEscape(getNextMessage());
-  }, [handleEscape, getNextMessage]);
+    tryEscape(getNextMessage());
+  }, [tryEscape, getNextMessage]);
 
   if (accepted) {
     return (
@@ -99,6 +108,9 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                     position={position}
                     label={config.noLabel}
                     className={theme.noButton}
+                    canEscape={canEscape}
+                    scale={scale}
+                    transitionDuration={transitionDuration}
                     onEscape={onNoEscape}
                   />
                 </div>
@@ -109,7 +121,7 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                     className={cn(
                       'animate-taunt-pop text-base font-medium sm:text-lg',
                       theme.tauntText,
-                      escapeCount >= 8 && 'text-lg sm:text-xl',
+                      escapeCount >= 10 && 'text-lg sm:text-xl',
                     )}
                     role="status"
                     aria-live="polite"
