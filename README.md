@@ -1,63 +1,35 @@
-# Magic Link
+# نهِ غیرممکن
 
-Lightweight platform for personalized interactive web pages, shared via URL.
+پلتفرم سبک برای ساخت لینک‌های تعاملی فارسی — دکمهٔ «نه» فرار می‌کند، «بله» جشن می‌گیرد.
 
-Every page is driven by `src/content/links.json`. Push to GitHub → Vercel deploys automatically.
+بدون دیتابیس. بدون ذخیره‌سازی. همه‌چیز داخل پارامترهای URL.
 
-## Quick Start
+## اجرا
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+[http://localhost:3000](http://localhost:3000)
 
-## Sample Links
+## ساخت لینک
 
-| URL | Template |
-|-----|----------|
-| `/homa` | Date invitation |
-| `/sara-birthday` | Birthday surprise |
-| `/john-anniversary` | Anniversary |
-| `/best-friends` | Friendship |
-| `/hello-world` | Greeting |
-| `/client-123` | Custom page |
+1. به صفحهٔ اصلی بروید
+2. فرم را پر کنید: سوال، متن دکمه بله، متن دکمه نه، پیام موفقیت
+3. «ساخت لینک» را بزنید
+4. لینک را کپی و بفرستید
 
-## Add a New Page
-
-Edit `src/content/links.json`:
-
-```json
-{
-  "slug": "my-page",
-  "template": "greeting",
-  "title": "Hello!",
-  "subtitle": "Just for you",
-  "name": "Friend",
-  "message": "Your message here.",
-  "image": "https://images.unsplash.com/photo-...",
-  "animation": "fade",
-  "buttons": [
-    { "label": "Say hi", "href": "#", "variant": "primary" }
-  ]
-}
-```
-
-Push to GitHub. Vercel rebuilds. Your page is live at `/my-page`.
-
-## Project Structure
+## فرمت URL
 
 ```
-src/
-├── app/              # Next.js routes
-├── templates/        # Template components
-├── components/       # UI, effects, layout
-├── content/          # links.json + templates.json
-├── lib/              # Registry, loader, resolver
-└── types/            # TypeScript types
+/v?q=سوال&y=بله&n=نه&s=پیام-موفقیت
 ```
 
-## Deploy
+## نمونه
 
-Connected to Vercel — every `git push` deploys automatically. No database or external services required.
+[/v?q=...](http://localhost:3000/v) — دکمه «مشاهدهٔ نمونه» در صفحهٔ اصلی
+
+## استقرار
+
+Push به GitHub → Vercel خودکار deploy می‌کند. نیازی به تنظیم اضافه نیست.
