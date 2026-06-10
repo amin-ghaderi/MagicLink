@@ -8,11 +8,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getTheme } from '@/lib/themes';
+import { MOBILE_NO_RESPONSES } from '@/data/mobileNoResponses';
 import { useEscapeMessages } from '@/hooks/useEscapeMessages';
 import { useInteractionMode } from '@/hooks/useInteractionMode';
+import { useShuffleBagMessages } from '@/hooks/useShuffleBagMessages';
 import type { ExperienceConfig } from '@/types/experience';
 import { ExperienceShell } from './ExperienceShell';
 import { EscapingNoButton } from './EscapingNoButton';
+import { MobileNoButton } from './MobileNoButton';
+import { MobileResponseMessage } from './MobileResponseMessage';
 import { useEscapingButton } from './useEscapingButton';
 
 interface ImpossibleNoExperienceProps {
@@ -24,25 +28,34 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
   const boundsContainerRef = useRef<HTMLDivElement>(null);
   const theme = useMemo(() => getTheme(config.theme), [config.theme]);
   const mode = useInteractionMode();
-  const { getNextMessage } = useEscapeMessages(config.seed);
 
-  const getMessage = useCallback(() => getNextMessage(), [getNextMessage]);
+  // Desktop: fleeing taunts
+  const { getNextMessage: getDesktopMessage } = useEscapeMessages(config.seed);
+  // Mobile: conversational responses
+  const { getNextMessage: getMobileMessage } = useShuffleBagMessages(
+    MOBILE_NO_RESPONSES,
+    config.seed + 31_337,
+  );
 
-  const {
-    buttonRef,
-    isFloating,
-    position,
-    instantMove,
-    escapeCount,
-    tauntMessage,
-    scale,
-    transitionDuration,
-    triggerEscape,
-  } = useEscapingButton({
+  const [mobileResponse, setMobileResponse] = useState<string | null>(null);
+  const [mobileTapCount, setMobileTapCount] = useState(0);
+
+  const getDesktopEscapeMessage = useCallback(() => getDesktopMessage(), [getDesktopMessage]);
+
+  const desktop = useEscapingButton({
     mode,
     boundsContainerRef,
-    onEscape: getMessage,
+    onEscape: getDesktopEscapeMessage,
   });
+
+  const handleMobileNoTap = useCallback(() => {
+    setMobileTapCount((c) => c + 1);
+    setMobileResponse(getMobileMessage());
+  }, [getMobileMessage]);
+
+  const isDesktop = mode === 'desktop';
+  const displayMessage = isDesktop ? desktop.tauntMessage : mobileResponse;
+  const messageKey = isDesktop ? desktop.escapeCount : mobileTapCount;
 
   if (accepted) {
     return (
@@ -94,7 +107,7 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                 <div
                   className={cn(
                     'relative flex min-h-[3.5rem] flex-wrap items-center justify-center gap-4',
-                    isFloating && 'min-h-[4rem]',
+                    isDesktop && desktop.isFloating && 'min-h-[4rem]',
                   )}
                 >
                   <Button
@@ -109,34 +122,48 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
                     {config.yesLabel}
                   </Button>
 
-                  <EscapingNoButton
-                    buttonRef={buttonRef}
-                    mode={mode}
-                    isFloating={isFloating}
-                    position={position}
-                    label={config.noLabel}
-                    className={theme.noButton}
-                    scale={scale}
-                    transitionDuration={transitionDuration}
-                    instantMove={instantMove}
-                    onForceEscape={triggerEscape}
-                  />
+                  {isDesktop ? (
+                    <EscapingNoButton
+                      buttonRef={desktop.buttonRef}
+                      isFloating={desktop.isFloating}
+                      position={desktop.position}
+                      label={config.noLabel}
+                      className={theme.noButton}
+                      scale={desktop.scale}
+                      transitionDuration={desktop.transitionDuration}
+                      instantMove={desktop.instantMove}
+                      onForceEscape={desktop.triggerEscape}
+                    />
+                  ) : (
+                    <MobileNoButton
+                      label={config.noLabel}
+                      className={theme.noButton}
+                      onTap={handleMobileNoTap}
+                    />
+                  )}
                 </div>
 
-                {tauntMessage && (
-                  <p
-                    key={`${tauntMessage}-${escapeCount}`}
-                    className={cn(
-                      'animate-taunt-pop text-base font-medium sm:text-lg',
-                      theme.tauntText,
-                      escapeCount >= 10 && 'text-lg sm:text-xl',
-                    )}
-                    role="status"
-                    aria-live="polite"
-                  >
-                    {tauntMessage}
-                  </p>
-                )}
+                {displayMessage &&
+                  (isDesktop ? (
+                    <p
+                      key={`${displayMessage}-${messageKey}`}
+                      className={cn(
+                        'animate-taunt-pop text-base font-medium sm:text-lg',
+                        theme.tauntText,
+                        desktop.escapeCount >= 10 && 'text-lg sm:text-xl',
+                      )}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {displayMessage}
+                    </p>
+                  ) : (
+                    <MobileResponseMessage
+                      message={displayMessage}
+                      tapCount={messageKey}
+                      className={theme.tauntText}
+                    />
+                  ))}
               </CardContent>
             </Card>
           </FadeIn>

@@ -155,18 +155,17 @@ export function useEscapingButton({
 
   const triggerEscape = useCallback(
     (reason: string, options?: { skipCooldown?: boolean }) => {
-      if (!canEscapeRef.current) return;
+      if (mode !== 'desktop' || !canEscapeRef.current) return;
 
       const now = Date.now();
-      const moveCooldown = mode === 'desktop' ? 70 : 0;
-      if (!options?.skipCooldown && now - lastMoveAtRef.current < moveCooldown) {
+      if (!options?.skipCooldown && now - lastMoveAtRef.current < 70) {
         return;
       }
       lastMoveAtRef.current = now;
 
       moveButton(reason);
 
-      if (mode === 'mobile' || now - lastMessageAtRef.current > 350) {
+      if (now - lastMessageAtRef.current > 350) {
         setTauntMessage(onEscapeRef.current());
         lastMessageAtRef.current = now;
       }
@@ -174,7 +173,7 @@ export function useEscapingButton({
     [mode, moveButton],
   );
 
-  // Desktop: rAF proximity loop — escape BEFORE cursor reaches button
+  // Desktop only: rAF proximity loop
   useEffect(() => {
     if (mode !== 'desktop') return;
 
