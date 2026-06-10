@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { buildExperienceUrl } from '@/lib/linkParams';
-import { DEFAULT_EXPERIENCE, type ExperienceConfig } from '@/types/experience';
+import { buildExperienceUrl, createExperienceConfig } from '@/lib/linkParams';
+import { THEME_LIST } from '@/lib/themes';
+import { DEFAULT_EXPERIENCE, type ExperienceConfig, type ThemeId } from '@/types/experience';
+
+type FormFields = Omit<ExperienceConfig, 'seed'>;
 
 const FIELDS: Array<{
-  key: keyof ExperienceConfig;
+  key: keyof FormFields;
   label: string;
   placeholder: string;
   multiline?: boolean;
@@ -25,14 +28,21 @@ const FIELDS: Array<{
 ];
 
 export function LinkGeneratorForm() {
-  const [form, setForm] = useState<ExperienceConfig>(DEFAULT_EXPERIENCE);
+  const [form, setForm] = useState<FormFields>({
+    question: DEFAULT_EXPERIENCE.question,
+    yesLabel: DEFAULT_EXPERIENCE.yesLabel,
+    noLabel: DEFAULT_EXPERIENCE.noLabel,
+    successMessage: DEFAULT_EXPERIENCE.successMessage,
+    theme: DEFAULT_EXPERIENCE.theme,
+  });
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const base = typeof window !== 'undefined' ? window.location.origin : '';
-    setGeneratedUrl(buildExperienceUrl(form, base));
+    const config = createExperienceConfig(form);
+    setGeneratedUrl(buildExperienceUrl(config, base));
     setCopied(false);
   }
 
@@ -48,12 +58,34 @@ export function LinkGeneratorForm() {
       <CardHeader>
         <CardTitle className="text-2xl">ساخت لینک اختصاصی</CardTitle>
         <CardDescription>
-          فیلدها را پر کنید و لینک خود را بسازید. هیچ چیزی ذخیره نمی‌شود — همه‌چیز داخل
-          آدرس لینک است.
+          تم را انتخاب کنید، فیلدها را پر کنید و لینک کوتاه خود را بگیرید. هیچ چیزی
+          ذخیره نمی‌شود.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Theme picker */}
+          <div className="space-y-3">
+            <span className="block text-sm font-medium text-white/90">تم</span>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {THEME_LIST.map((theme) => (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, theme: theme.id as ThemeId }))}
+                  className={cn(
+                    'rounded-xl border px-3 py-3 text-sm font-medium transition-all',
+                    form.theme === theme.id
+                      ? 'border-violet-400/60 bg-violet-500/25 text-white shadow-lg shadow-violet-500/20'
+                      : 'border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10',
+                  )}
+                >
+                  {theme.label} {theme.emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {FIELDS.map((field) => (
             <div key={field.key} className="space-y-2 text-right">
               <label htmlFor={field.key} className="block text-sm font-medium text-white/90">
@@ -66,7 +98,9 @@ export function LinkGeneratorForm() {
                   required
                   maxLength={300}
                   value={form[field.key]}
-                  onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
                   placeholder={field.placeholder}
                   className="w-full resize-none rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 focus:border-violet-400/50 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
                 />
@@ -77,7 +111,9 @@ export function LinkGeneratorForm() {
                   required
                   maxLength={300}
                   value={form[field.key]}
-                  onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
                   placeholder={field.placeholder}
                   className="w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-white placeholder:text-white/40 focus:border-violet-400/50 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
                 />
@@ -98,7 +134,7 @@ export function LinkGeneratorForm() {
           <div className="mt-6 space-y-3 rounded-xl border border-violet-400/30 bg-violet-500/10 p-4">
             <p className="text-sm font-medium text-violet-200">لینک شما آماده است:</p>
             <p
-              className="break-all rounded-lg bg-black/20 p-3 text-left text-xs text-white/80 ltr:dir-ltr"
+              className="break-all rounded-lg bg-black/20 p-3 text-left text-xs text-white/80"
               dir="ltr"
             >
               {generatedUrl}

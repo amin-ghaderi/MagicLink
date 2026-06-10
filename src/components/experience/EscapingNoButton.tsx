@@ -8,6 +8,7 @@ interface EscapingNoButtonProps {
   isFloating: boolean;
   position: { x: number; y: number } | null;
   label: string;
+  className?: string;
   onEscape: () => void;
 }
 
@@ -16,6 +17,7 @@ export function EscapingNoButton({
   isFloating,
   position,
   label,
+  className,
   onEscape,
 }: EscapingNoButtonProps) {
   return (
@@ -25,7 +27,8 @@ export function EscapingNoButton({
       variant="secondary"
       size="lg"
       className={cn(
-        'select-none border-pink-300/30 bg-pink-500/20 text-white hover:bg-pink-500/30',
+        'select-none text-white',
+        className,
         isFloating && 'fixed z-50 touch-none',
         !isFloating && 'relative',
       )}

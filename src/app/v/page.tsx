@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ImpossibleNoExperience } from '@/components/experience/ImpossibleNoExperience';
-import { PageShell } from '@/components/layout/PageShell';
 import { parseExperienceParams } from '@/lib/linkParams';
 
 interface PageProps {
@@ -13,11 +12,11 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const config = parseExperienceParams(params);
 
   if (!config) {
-    return { title: 'لینک نامعتبر — نهِ غیرممکن' };
+    return { title: 'پیام' };
   }
 
   return {
-    title: `${config.question} — نهِ غیرممکن`,
+    title: config.question,
     description: config.question,
   };
 }
@@ -30,9 +29,5 @@ export default async function ExperiencePage({ searchParams }: PageProps) {
     notFound();
   }
 
-  return (
-    <PageShell gradient="rose">
-      <ImpossibleNoExperience config={config} />
-    </PageShell>
-  );
+  return <ImpossibleNoExperience config={config} />;
 }
