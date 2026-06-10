@@ -20,8 +20,6 @@ export interface ExperiencePayload {
   r: number;
 }
 
-export const PAYLOAD_PARAM = 'd';
-
 export const DEFAULT_EXPERIENCE: ExperienceConfig = {
   question: 'آیا با من قرار می‌ری؟ ❤️',
   yesLabel: 'بله 💖',

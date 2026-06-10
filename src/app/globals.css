@@ -121,3 +121,18 @@
 .animate-mobile-message {
   animation: mobile-message 0.45s ease-out forwards;
 }
+
+@keyframes love-title {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-love-title {
+  animation: love-title 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

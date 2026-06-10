@@ -1,7 +1,12 @@
-import { fromBase64Url, toBase64Url } from '@/lib/base64url';
+import {
+  buildTemplateUrl,
+  decodePayload,
+  encodePayload,
+  parsePayloadParam,
+  PAYLOAD_PARAM,
+} from '@/lib/payloadCodec';
 import {
   DEFAULT_EXPERIENCE,
-  PAYLOAD_PARAM,
   type ExperienceConfig,
   type ExperiencePayload,
   type ThemeId,
@@ -9,6 +14,8 @@ import {
 import { THEME_CODES, THEME_TO_CODE } from '@/lib/themes';
 
 const MAX_FIELD_LENGTH = 300;
+
+const EXPERIENCE_PATH = '/v';
 
 function isValidField(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_FIELD_LENGTH;
@@ -49,40 +56,32 @@ function payloadToConfig(payload: ExperiencePayload): ExperienceConfig | null {
   };
 }
 
+function isValidPayload(payload: ExperiencePayload): boolean {
+  return payloadToConfig(payload) !== null;
+}
+
+export { PAYLOAD_PARAM };
+
 export function encodeExperience(config: ExperienceConfig): string {
-  const json = JSON.stringify(configToPayload(config));
-  return toBase64Url(json);
+  return encodePayload(configToPayload(config));
 }
 
 export function decodeExperience(encoded: string): ExperienceConfig | null {
-  const json = fromBase64Url(encoded);
-  if (!json) return null;
-
-  try {
-    const payload = JSON.parse(json) as ExperiencePayload;
-    return payloadToConfig(payload);
-  } catch {
-    return null;
-  }
+  const payload = decodePayload<ExperiencePayload>(encoded);
+  if (!payload) return null;
+  return payloadToConfig(payload);
 }
 
 export function parseExperienceParams(
   params: Record<string, string | string[] | undefined>,
 ): ExperienceConfig | null {
-  const raw = params[PAYLOAD_PARAM];
-  if (!raw || Array.isArray(raw)) return null;
-
-  try {
-    const decoded = decodeURIComponent(raw);
-    return decodeExperience(decoded);
-  } catch {
-    return decodeExperience(raw);
-  }
+  const payload = parsePayloadParam<ExperiencePayload>(params, isValidPayload);
+  if (!payload) return null;
+  return payloadToConfig(payload);
 }
 
 export function buildExperienceUrl(config: ExperienceConfig, baseUrl = ''): string {
-  const encoded = encodeExperience(config);
-  return `${baseUrl}/v?${PAYLOAD_PARAM}=${encodeURIComponent(encoded)}`;
+  return buildTemplateUrl(EXPERIENCE_PATH, configToPayload(config), baseUrl);
 }
 
 export function buildDemoUrl(baseUrl = ''): string {
