@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FadeIn } from '@/components/effects/FadeIn';
 import { LoveLetterForm } from '@/components/love/LoveLetterForm';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 import { PageShell } from '@/components/layout/PageShell';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export default function LoveLetterLandingPage() {
 
   return (
     <PageShell gradient="rose">
+      <SiteHeader />
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
         <section className="mb-16 text-center">
           <FadeIn>
@@ -95,7 +97,7 @@ export default function LoveLetterLandingPage() {
 
         <footer className="border-t border-white/10 pt-8 text-center text-sm text-white/50">
           <Link href="/" className="text-rose-300/80 hover:text-rose-200">
-            ← بازگشت به نهِ غیرممکن
+            ← بازگشت به لحظه‌ساز
           </Link>
         </footer>
       </div>

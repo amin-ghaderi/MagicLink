@@ -9,9 +9,9 @@ const vazirmatn = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: 'نهِ غیرممکن — لینک‌های تعاملی و شخصی',
+  title: 'لحظه‌ساز — لینک‌های تعاملی و شخصی',
   description:
-    'سوال خود را بپرسید، دکمهٔ نه فرار کند، و فقط «بله» جواب ممکن باشد. بدون ثبت‌نام، بدون ذخیره‌سازی.',
+    'لینک‌های تعاملی، عاشقانه و بامزه بساز و بفرست. بدون ثبت‌نام، بدون نصب، بدون ذخیره‌سازی.',
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" className="scroll-smooth">
       <body className={`${vazirmatn.variable} font-sans antialiased`}>{children}</body>
     </html>
   );
