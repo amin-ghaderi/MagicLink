@@ -1,3 +1,4 @@
+import { fromBase64Url, toBase64Url } from '@/lib/base64url';
 import {
   DEFAULT_EXPERIENCE,
   PAYLOAD_PARAM,
@@ -8,35 +9,6 @@ import {
 import { THEME_CODES, THEME_TO_CODE } from '@/lib/themes';
 
 const MAX_FIELD_LENGTH = 300;
-
-function toBase64Url(str: string): string {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(str, 'utf-8').toString('base64url');
-  }
-  const bytes = new TextEncoder().encode(str);
-  let binary = '';
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-function fromBase64Url(encoded: string): string | null {
-  try {
-    const padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
-    const pad = padded.length % 4 === 0 ? '' : '='.repeat(4 - (padded.length % 4));
-
-    if (typeof Buffer !== 'undefined') {
-      return Buffer.from(padded + pad, 'base64').toString('utf-8');
-    }
-
-    const binary = atob(padded + pad);
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-    return new TextDecoder().decode(bytes);
-  } catch {
-    return null;
-  }
-}
 
 function isValidField(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_FIELD_LENGTH;
@@ -99,12 +71,18 @@ export function parseExperienceParams(
 ): ExperienceConfig | null {
   const raw = params[PAYLOAD_PARAM];
   if (!raw || Array.isArray(raw)) return null;
-  return decodeExperience(raw);
+
+  try {
+    const decoded = decodeURIComponent(raw);
+    return decodeExperience(decoded);
+  } catch {
+    return decodeExperience(raw);
+  }
 }
 
 export function buildExperienceUrl(config: ExperienceConfig, baseUrl = ''): string {
   const encoded = encodeExperience(config);
-  return `${baseUrl}/v?${PAYLOAD_PARAM}=${encoded}`;
+  return `${baseUrl}/v?${PAYLOAD_PARAM}=${encodeURIComponent(encoded)}`;
 }
 
 export function buildDemoUrl(baseUrl = ''): string {

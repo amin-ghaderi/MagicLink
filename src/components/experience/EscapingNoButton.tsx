@@ -2,44 +2,38 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { InteractionMode } from '@/hooks/useInteractionMode';
 
 interface EscapingNoButtonProps {
   buttonRef: React.RefObject<HTMLButtonElement | null>;
+  mode: InteractionMode;
   isFloating: boolean;
   position: { x: number; y: number } | null;
   label: string;
   className?: string;
-  canEscape: boolean;
   scale: number;
   transitionDuration: number;
-  onEscape: () => void;
+  onMobileEscape: () => void;
 }
 
 export function EscapingNoButton({
   buttonRef,
+  mode,
   isFloating,
   position,
   label,
   className,
-  canEscape,
   scale,
   transitionDuration,
-  onEscape,
+  onMobileEscape,
 }: EscapingNoButtonProps) {
-  const handlePointerEnter = (e: React.PointerEvent<HTMLButtonElement>) => {
-    // Desktop / pen: escape when pointer enters the button area
-    if (e.pointerType === 'touch') return;
-    if (!canEscape) return;
-    onEscape();
-  };
-
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!canEscape) return;
+    if (mode !== 'mobile') return;
 
-    // Touch: move before the tap completes (pointerdown fires before click)
-    if (e.pointerType === 'touch') {
+    // Escape before tap completes — finger never lands on NO
+    if (e.pointerType === 'touch' || e.pointerType === 'pen') {
       e.preventDefault();
-      onEscape();
+      onMobileEscape();
     }
   };
 
@@ -52,9 +46,9 @@ export function EscapingNoButton({
       className={cn(
         'select-none text-white will-change-[left,top,transform]',
         className,
-        isFloating && 'fixed z-50 touch-none',
+        isFloating && 'fixed z-50',
+        mode === 'mobile' && 'touch-manipulation',
         !isFloating && 'relative',
-        !canEscape && 'cursor-default',
       )}
       style={{
         ...(isFloating && position
@@ -69,7 +63,6 @@ export function EscapingNoButton({
         transform: `scale(${scale})`,
         transformOrigin: 'center center',
       }}
-      onPointerEnter={handlePointerEnter}
       onPointerDown={handlePointerDown}
       onClick={(e) => e.preventDefault()}
     >

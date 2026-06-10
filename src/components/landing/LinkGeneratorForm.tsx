@@ -36,21 +36,35 @@ export function LinkGeneratorForm() {
     theme: DEFAULT_EXPERIENCE.theme,
   });
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    const config = createExperienceConfig(form);
-    setGeneratedUrl(buildExperienceUrl(config, base));
-    setCopied(false);
+    setError(null);
+
+    try {
+      const config = createExperienceConfig(form);
+      const base = window.location.origin;
+      const url = buildExperienceUrl(config, base);
+      setGeneratedUrl(url);
+      setCopied(false);
+    } catch (err) {
+      console.error('Link generation failed:', err);
+      setGeneratedUrl(null);
+      setError('خطا در ساخت لینک. لطفاً دوباره تلاش کنید.');
+    }
   }
 
   async function handleCopy() {
     if (!generatedUrl) return;
-    await navigator.clipboard.writeText(generatedUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(generatedUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('کپی لینک ممکن نشد. لینک را دستی انتخاب کنید.');
+    }
   }
 
   return (
@@ -64,7 +78,6 @@ export function LinkGeneratorForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Theme picker */}
           <div className="space-y-3">
             <span className="block text-sm font-medium text-white/90">تم</span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -120,6 +133,12 @@ export function LinkGeneratorForm() {
               )}
             </div>
           ))}
+
+          {error && (
+            <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+            </p>
+          )}
 
           <Button
             type="submit"

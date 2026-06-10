@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getTheme } from '@/lib/themes';
 import { useEscapeMessages } from '@/hooks/useEscapeMessages';
+import { useInteractionMode } from '@/hooks/useInteractionMode';
 import type { ExperienceConfig } from '@/types/experience';
 import { ExperienceShell } from './ExperienceShell';
 import { EscapingNoButton } from './EscapingNoButton';
@@ -21,10 +22,13 @@ interface ImpossibleNoExperienceProps {
 export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) {
   const [accepted, setAccepted] = useState(false);
   const theme = useMemo(() => getTheme(config.theme), [config.theme]);
+  const mode = useInteractionMode();
   const { getNextMessage } = useEscapeMessages(config.seed);
+
+  const getMessage = useCallback(() => getNextMessage(), [getNextMessage]);
+
   const {
     buttonRef,
-    canEscape,
     isFloating,
     position,
     escapeCount,
@@ -32,11 +36,7 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
     scale,
     transitionDuration,
     tryEscape,
-  } = useEscapingButton();
-
-  const onNoEscape = useCallback(() => {
-    tryEscape(getNextMessage());
-  }, [tryEscape, getNextMessage]);
+  } = useEscapingButton({ mode, onEscape: getMessage });
 
   if (accepted) {
     return (
@@ -104,14 +104,14 @@ export function ImpossibleNoExperience({ config }: ImpossibleNoExperienceProps) 
 
                   <EscapingNoButton
                     buttonRef={buttonRef}
+                    mode={mode}
                     isFloating={isFloating}
                     position={position}
                     label={config.noLabel}
                     className={theme.noButton}
-                    canEscape={canEscape}
                     scale={scale}
                     transitionDuration={transitionDuration}
-                    onEscape={onNoEscape}
+                    onMobileEscape={tryEscape}
                   />
                 </div>
 
